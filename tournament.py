@@ -42,9 +42,6 @@ def countPlayers():
 def registerPlayer(name):
     """Adds a player to the tournament database.
   
-    The database assigns a unique serial id number for the player.  (This
-    should be handled by your SQL database schema, not in your Python code.)
-  
     Args:
       name: the player's full name (need not be unique).
     """
@@ -56,23 +53,29 @@ def registerPlayer(name):
 
 
 def playerStandings():
-    """Returns a list of the players and their total match points,
-    sorted by match points. If there is a tie, ties are broken by
-    opponents' match points.
+    """Returns a list of the players and their total number of matches won,
+    sorted by matches won.
 
     Returns:
       A list of tuples, each of which contains
-      (id, name, wins, matches):
+      (id, name, wins, losses):
         id: the player's unique id (assigned by the database)
         name: the player's full name (as registered)
-        wins: the number of match the player has won
+        wins: the number of matches the player has won
         matches: the number of matches the player has played
-        opponentMatchPoints: match points of opponents, used for tiebreakers
     """
 
     DB = connect()
     c = DB.cursor()
-    c.execute("SELECT playerID, name, wins, matches FROM players ORDER BY wins DESC")
+    """create a view listing the number of wins each player has"""
+    c.execute("CREATE VIEW wins AS SELECT playerID, name, COUNT(WINNERID) as numWins FROM players FULL JOIN matches on playerID=winnerID GROUP BY playerID")
+
+    """create a view listing the number of losses each player has"""
+    c.execute("CREATE VIEW losses AS SELECT playerID, COUNT(loserID) as numLosses FROM players FULL JOIN matches on playerID=loserID GROUP BY playerID")
+
+    """select the number of wins and matches played for each player from joining the two views"""
+    c.execute("SELECT wins.playerID, name, numWins, numWins+numLosses FROM wins FULL JOIN losses on wins.playerID=losses.playerID ORDER BY numWins DESC")
+
     standings = c.fetchall()
     DB.close()
     return standings
@@ -85,25 +88,9 @@ def reportMatch(winner, loser):
       loser:  the id of the loser of the match
     """
 
-    """First update the matches table"""
     DB = connect()
     c = DB.cursor()
     c.execute("INSERT INTO matches VALUES (" + str(winner) + ", " + str(loser) + ")")
-    DB.commit()
-    
-    """Then update the players table"""
-    c.execute("SELECT matches FROM players WHERE playerID = " + str(winner))
-    m = c.fetchone()[0]
-    c.execute("UPDATE players SET matches = " + str(m+1) + " WHERE playerID = " + str(winner))
-    
-    c.execute("SELECT matches FROM players WHERE playerID = " + str(loser))
-    m = c.fetchone()[0]
-    c.execute("UPDATE players SET matches = " + str(m+1) + " WHERE playerID = " + str(loser))
-
-    c.execute("SELECT wins FROM players WHERE playerID = " + str(winner))
-    m = c.fetchone()[0]
-    c.execute("UPDATE players wins SET wins = " + str(m+1) + " WHERE playerID = " + str(winner))
-
     DB.commit()
     DB.close()
  
