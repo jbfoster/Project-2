@@ -5,7 +5,7 @@
 --name is the name of a player
 
 
-CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY, name TEXT)
+CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY, name TEXT);
 
 -- The matches table keeps track of all the matches played in the tournament
 
@@ -17,4 +17,4 @@ CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY, name TEXT)
 
 CREATE TABLE matches	(winnerID INT REFERENCES players(playerID),
 			loserID INT REFERENCES players(playerID),
-			PRIMARY KEY (winnerID, loserID))
+			PRIMARY KEY (winnerID, loserID));
