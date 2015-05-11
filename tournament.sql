@@ -1,14 +1,20 @@
--- Table definitions for the tournament project.
---
--- Put your SQL 'create table' statements in this file; also 'create view'
--- statements if you choose to use it.
---
--- You can write comments in this file by starting them with two dashes, like
--- these lines here.
+--The players table keeps track of each player in the tournament
+
+--playerID is a unique ID for each player
+
+--name is the name of a player
 
 
-CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY,
-			 name TEXT, wins INT DEFAULT 0, matches INT DEFAULT 0);
+CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY, name TEXT)
 
-CREATE TABLE matches	(winnerID INT, loserID INT)
+-- The matches table keeps track of all the matches played in the tournament
 
+-- winnerid is the playerID of the winning player
+
+--loserID is the playerID of the losing player
+
+--winnerID and loserID are foreign keys referencing playerID in players table
+
+CREATE TABLE matches	(winnerID INT REFERENCES players(playerID),
+			loserID INT REFERENCES players(playerID),
+			PRIMARY KEY (winnerID, loserID))
