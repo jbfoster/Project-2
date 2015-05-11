@@ -41,7 +41,7 @@ def countPlayers():
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
+
     Args:
       name: the player's full name (need not be unique).
     """
@@ -68,13 +68,16 @@ def playerStandings():
     DB = connect()
     c = DB.cursor()
     """create a view listing the number of wins each player has"""
-    c.execute("CREATE VIEW wins AS SELECT playerID, name, COUNT(WINNERID) as numWins FROM players FULL JOIN matches on playerID=winnerID GROUP BY playerID")
+    c.execute("CREATE VIEW wins AS SELECT playerID, name, COUNT(WINNERID) as numWins \
+              FROM players FULL JOIN matches on playerID=winnerID GROUP BY playerID")
 
     """create a view listing the number of losses each player has"""
-    c.execute("CREATE VIEW losses AS SELECT playerID, COUNT(loserID) as numLosses FROM players FULL JOIN matches on playerID=loserID GROUP BY playerID")
+    c.execute("CREATE VIEW losses AS SELECT playerID, COUNT(loserID) as numLosses \
+              FROM players FULL JOIN matches on playerID=loserID GROUP BY playerID")
 
     """select the number of wins and matches played for each player from joining the two views"""
-    c.execute("SELECT wins.playerID, name, numWins, numWins+numLosses FROM wins FULL JOIN losses on wins.playerID=losses.playerID ORDER BY numWins DESC")
+    c.execute("SELECT wins.playerID, name, numWins, numWins+numLosses \
+              FROM wins FULL JOIN losses on wins.playerID=losses.playerID ORDER BY numWins DESC")
 
     standings = c.fetchall()
     DB.close()
@@ -90,7 +93,7 @@ def reportMatch(winner, loser):
 
     DB = connect()
     c = DB.cursor()
-    c.execute("INSERT INTO matches VALUES (" + str(winner) + ", " + str(loser) + ")")
+    c.execute("INSERT INTO matches (winnerID, loserID) VALUES (%s, %s)", (winner, loser))
     DB.commit()
     DB.close()
  
@@ -114,7 +117,7 @@ def swissPairings():
     standings = playerStandings()
     pairs = len(standings) / 2
     pairings = []
-    for x in range (0, pairs):
+    for x in range(0, pairs):
         pairings.append((standings[2*x][0], standings[2*x][1], standings[2*x+1][0], standings[2*x+1][1]))
 
     return pairings
