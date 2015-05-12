@@ -15,6 +15,7 @@ def deleteMatches():
     """Remove all the match records from the database."""
     DB = connect()
     c = DB.cursor()
+    """Delete all records from the matches table and commit the change"""
     c.execute("DELETE FROM matches")
     DB.commit()
     DB.close()
@@ -24,6 +25,7 @@ def deletePlayers():
     """Remove all the player records from the database."""
     DB = connect()
     c = DB.cursor()
+    """Delete all records from the players table and commit the change"""
     c.execute("DELETE FROM players")
     DB.commit()
     DB.close()
@@ -33,7 +35,9 @@ def countPlayers():
     """Returns the number of players currently registered."""
     DB = connect()
     c = DB.cursor()
+    """Count the number of records in the players table"""
     c.execute("SELECT COUNT(*) FROM players")
+    """fetch the result of the SQL SELECT statement and convert result to integer"""
     numPlayers = int(c.fetchone()[0])
     DB.close()
     return numPlayers
@@ -47,6 +51,7 @@ def registerPlayer(name):
     """
     DB = connect()
     c = DB.cursor()
+    """Insert the new players name into the players table and commit the change"""
     c.execute("INSERT INTO players (name) VALUES (%s)", (name,))
     DB.commit()
     DB.close()
@@ -93,6 +98,7 @@ def reportMatch(winner, loser):
 
     DB = connect()
     c = DB.cursor()
+    """Create a new record in the matches table with the IDs of the winner and loser"""
     c.execute("INSERT INTO matches (winnerID, loserID) VALUES (%s, %s)", (winner, loser))
     DB.commit()
     DB.close()
@@ -114,10 +120,15 @@ def swissPairings():
         name2: the second player's name
     """
 
+    """Get current standings in order to pair players"""
     standings = playerStandings()
+    """Assuming an even number of players there will be a match for every 2 players"""
     pairs = len(standings) / 2
+    """Create an empty tuple to store pairings"""
     pairings = []
+    """Cycle through each pair of players in the standings"""
     for x in range(0, pairs):
+        """Grab the player IDs and names for a pair of players and append them to the pairings tuple"""
         pairings.append((standings[2*x][0], standings[2*x][1], standings[2*x+1][0], standings[2*x+1][1]))
 
     return pairings
