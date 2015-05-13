@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
@@ -15,7 +15,7 @@ def deleteMatches():
     """Remove all the match records from the database."""
     DB = connect()
     c = DB.cursor()
-    """Delete all records from the matches table and commit the change"""
+    #Delete all records from matches table and commit the change
     c.execute("DELETE FROM matches")
     DB.commit()
     DB.close()
@@ -25,7 +25,7 @@ def deletePlayers():
     """Remove all the player records from the database."""
     DB = connect()
     c = DB.cursor()
-    """Delete all records from the players table and commit the change"""
+    #Delete all records from players table and commit the change
     c.execute("DELETE FROM players")
     DB.commit()
     DB.close()
@@ -35,9 +35,9 @@ def countPlayers():
     """Returns the number of players currently registered."""
     DB = connect()
     c = DB.cursor()
-    """Count the number of records in the players table"""
+    #Count the number of records in the players table
     c.execute("SELECT COUNT(*) FROM players")
-    """fetch the result of the SQL SELECT statement and convert result to integer"""
+    #Fetch the result of the SQL select statement and convert result to integer
     numPlayers = int(c.fetchone()[0])
     DB.close()
     return numPlayers
@@ -51,7 +51,7 @@ def registerPlayer(name):
     """
     DB = connect()
     c = DB.cursor()
-    """Insert the new players name into the players table and commit the change"""
+    #Insert the new player's name into the players table and commit change
     c.execute("INSERT INTO players (name) VALUES (%s)", (name,))
     DB.commit()
     DB.close()
@@ -72,17 +72,12 @@ def playerStandings():
 
     DB = connect()
     c = DB.cursor()
-    """create a view listing the number of wins each player has"""
-    c.execute("CREATE VIEW wins AS SELECT playerID, name, COUNT(WINNERID) as numWins \
-              FROM players FULL JOIN matches on playerID=winnerID GROUP BY playerID")
 
-    """create a view listing the number of losses each player has"""
-    c.execute("CREATE VIEW losses AS SELECT playerID, COUNT(loserID) as numLosses \
-              FROM players FULL JOIN matches on playerID=loserID GROUP BY playerID")
-
-    """select the number of wins and matches played for each player from joining the two views"""
+    #select the number of wins and matches played for each player
+    #from joining the two views created in tournament.sql"""
     c.execute("SELECT wins.playerID, name, numWins, numWins+numLosses \
-              FROM wins FULL JOIN losses on wins.playerID=losses.playerID ORDER BY numWins DESC")
+              FROM wins FULL JOIN losses on wins.playerID=losses.playerID \
+              ORDER BY numWins DESC")
 
     standings = c.fetchall()
     DB.close()
@@ -98,20 +93,21 @@ def reportMatch(winner, loser):
 
     DB = connect()
     c = DB.cursor()
-    """Create a new record in the matches table with the IDs of the winner and loser"""
-    c.execute("INSERT INTO matches (winnerID, loserID) VALUES (%s, %s)", (winner, loser))
+    #Create a new record in matches table with the IDS of the winner and loser
+    c.execute("INSERT INTO matches (winnerID, loserID) VALUES (%s, %s)",
+              (winner, loser))
     DB.commit()
     DB.close()
- 
- 
+
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-  
+
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
-  
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -120,16 +116,18 @@ def swissPairings():
         name2: the second player's name
     """
 
-    """Get current standings in order to pair players"""
+    #Get current standings in order to pair players
     standings = playerStandings()
-    """Assuming an even number of players there will be a match for every 2 players"""
+    #Assuming an even number of players,
+    #there will be a match for every 2 players
     pairs = len(standings) / 2
-    """Create an empty tuple to store pairings"""
+    #Create an empty tuple to store pairings
     pairings = []
-    """Cycle through each pair of players in the standings"""
+    #Cycle through each pair of players in the standings
     for x in range(0, pairs):
-        """Grab the player IDs and names for a pair of players and append them to the pairings tuple"""
-        pairings.append((standings[2*x][0], standings[2*x][1], standings[2*x+1][0], standings[2*x+1][1]))
+        #Grab the player IDs and names for a pair of players
+        #and append to the pairings tuple
+        pairings.append((standings[2*x][0], standings[2*x][1],
+                         standings[2*x+1][0], standings[2*x+1][1]))
 
     return pairings
-
