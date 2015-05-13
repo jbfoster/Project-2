@@ -5,7 +5,7 @@
 --name is the name of a player
 
 
-CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY, name TEXT);
+CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY, naame TEXT);
 
 -- The matches table keeps track of all the matches played in the tournament
 
@@ -17,4 +17,15 @@ CREATE TABLE players	(playerID SERIAL NOT NULL PRIMARY KEY, name TEXT);
 
 CREATE TABLE matches	(winnerID INT REFERENCES players(playerID),
 			loserID INT REFERENCES players(playerID),
-			PRIMARY KEY (winnerID, loserID));
+			PRIMARY KEY (winnerID, loserID))
+;
+
+--create a view listing the number of wins each player has
+
+CREATE VIEW wins AS SELECT playerID, name, COUNT(winnerID) as numWins
+FROM players FULL JOIN matches on playerID=winnerID GROUP BY playerID;
+
+--create a view listing the number of losses each player has
+
+CREATE VIEW losses AS SELECT playerID, COUNT(loserID) as numLosses
+FROM players FULL JOIN matches on playerID=loserID GROUP BY playerID;
